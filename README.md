@@ -1,6 +1,6 @@
 # mnemogenomics
 
-A proof of concept (adapted from [https://github.com/karpathy/nanoGPT](nanoGPT)) for training a language model on FASTA files:
+A proof of concept (adapted from [nanoGPT](https://github.com/karpathy/nanoGPT)) for training a language model on FASTA files:
 
 * When fed a description as a prompt, it outputs a sequence (DNA, RNA or protein)
 * When fed a sequence, it outputs a description (presumably a prediction)
