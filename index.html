@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mnemogenomics Web Interface</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><i class="fas fa-dna"></i> Mnemogenomics</div>
+            <p>Sequence generation and description prediction</p>
+        </header>
+
+        <main>
+            <div class="grid-container">
+                <section class="grid-item model-loader-section card">
+                    <div class="card-header">
+                        <i class="fas fa-cogs"></i>
+                        <h2>1. Configure Model</h2>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab-button active" data-tab="exampleModelTab">Example Model</button>
+                        <button class="tab-button" data-tab="urlModelTab">Load from URL/Hub</button>
+                        <button class="tab-button" data-tab="customModelTab">Upload Files</button>
+                    </div>
+
+                    <div id="exampleModelTab" class="tab-content active">
+                        <p>Uses a pre-configured example model. (Note: Example model weights might be minimal and not produce meaningful biological output, for UI demo purposes).</p>
+                        <button id="loadExampleModelBtn" class="button-primary small-btn"><i class="fas fa-play-circle"></i> Use Example Model</button>
+                    </div>
+
+                    <div id="urlModelTab" class="tab-content">
+                        <p>Enter a URL to a directory containing model files (config.json, pytorch_model.bin, etc.) OR a Hugging Face Hub model ID.</p>
+                        <div class="form-group">
+                            <label for="modelUrlInput"><i class="fas fa-link"></i> Model URL or Hub ID:</label>
+                            <input type="text" id="modelUrlInput" placeholder="e.g., Xenova/distilgpt2 or https://your-host/model_dir/">
+                        </div>
+                        <button id="loadFromUrlBtn" class="button-primary small-btn"><i class="fas fa-cloud-download-alt"></i> Load from URL/Hub</button>
+                    </div>
+                    
+                    <div id="customModelTab" class="tab-content">
+                        <p>Upload your trained model files (Hugging Face Transformers format). This method has browser limitations.</p>
+                        <div class="file-input-grid">
+                            <div class="file-input-group">
+                                <label for="configFile"><i class="fas fa-file-code"></i> config.json:</label>
+                                <input type="file" id="configFile" accept=".json">
+                            </div>
+                            <div class="file-input-group">
+                                <label for="tokenizerConfigFile"><i class="fas fa-file-alt"></i> tokenizer_config.json:</label>
+                                <input type="file" id="tokenizerConfigFile" accept=".json">
+                            </div>
+                            <div class="file-input-group">
+                                <label for="vocabFile"><i class="fas fa-book"></i> vocab.json:</label>
+                                <input type="file" id="vocabFile" accept=".json">
+                            </div>
+                            <div class="file-input-group">
+                                <label for="modelFile"><i class="fas fa-hdd"></i> model.bin/onnx:</label>
+                                <input type="file" id="modelFile" accept=".bin,.onnx">
+                            </div>
+                        </div>
+                        <button id="applyCustomModelBtn" class="button-primary small-btn"><i class="fas fa-upload"></i> Load Uploaded Files</button>
+                    </div>
+                    <p class="model-status">Status: <span id="modelLoadStatus">No model loaded.</span></p>
+                </section>
+
+                <section class="grid-item input-section card">
+                    <div class="card-header">
+                        <i class="fas fa-keyboard"></i>
+                        <h2>2. Input & Mode</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputText">Input Sequence or Description:</label>
+                        <textarea id="inputText" rows="7" placeholder="Enter FASTA sequence(s) like:&#13;&#10;TCGGACTTTCC&#13;&#10;&#13;&#10;Or a description like:&#13;&#10;a protein involved in cellular signaling in saccaromyces cerevisiae"></textarea>
+                        <div class="input-options">
+                            <div class="input-option-group">
+                                <label for="uploadInputFile" class="button-secondary small-btn"><i class="fas fa-file-upload"></i> Upload File</label>
+                                <input type="file" id="uploadInputFile" accept=".fasta,.txt,.fa" style="display:none;">
+                            </div>
+                            <div class="input-option-group">
+                                <input type="text" id="fetchUrlInput" placeholder="Or paste URL to FASTA/TXT">
+                                <button id="fetchInputFromUrlBtn" class="button-secondary small-btn"><i class="fas fa-download"></i> Fetch</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Example Inputs:</label>
+                        <div id="exampleInputsContainer" class="example-buttons">
+                            <button class="button-tertiary example-btn" data-type="dna_seq">DNA Seq</button>
+                            <button class="button-tertiary example-btn" data-type="protein_seq">Protein Seq</button>
+                            <button class="button-tertiary example-btn" data-type="description">Description</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="generationMode"><i class="fas fa-exchange-alt"></i> Generation Mode:</label>
+                        <select id="generationMode">
+                            <option value="auto" selected>Auto-detect Input Type</option>
+                            <option value="desc_to_seq">Description to Sequence</option>
+                            <option value="seq_to_desc">Sequence to Description</option>
+                        </select>
+                    </div>
+                    <div class="form-group hidden" id="targetSequenceTypeGroup">
+                        <label for="targetSequenceType"><i class="fas fa-bullseye"></i> Target Sequence Type (for Desc-to-Seq):</label>
+                        <select id="targetSequenceType">
+                            <option value="DNA" selected>[DNA]</option>
+                            <option value="RNA">[RNA]</option>
+                            <option value="PROTEIN">[PROTEIN]</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="grid-item params-section card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h"></i>
+                        <h2>3. Generation Parameters</h2>
+                    </div>
+                    <div class="form-group slider-group">
+                        <label for="maxNewTokens">Max New Tokens: <span id="maxNewTokensValue">200</span></label>
+                        <input type="range" id="maxNewTokens" min="10" max="512" value="200">
+                    </div>
+                    <div class="form-group slider-group">
+                        <label for="temperature">Temperature: <span id="temperatureValue">0.8</span></label>
+                        <input type="range" id="temperature" min="0.1" max="2.0" step="0.05" value="0.8">
+                    </div>
+                    <div class="form-group slider-group">
+                        <label for="topK">Top-K: <span id="topKValue">50</span></label>
+                        <input type="range" id="topK" min="0" max="200" value="50">
+                        <span>(0 to disable)</span>
+                    </div>
+                </section>
+                
+                <section class="grid-item generate-section">
+                    <button id="generateBtn" class="action-button"><i class="fas fa-magic"></i> Generate</button>
+                </section>
+
+                <section class="grid-item output-section card">
+                     <div class="card-header">
+                        <i class="fas fa-desktop"></i>
+                        <h2>4. Output</h2>
+                    </div>
+                    <textarea id="outputText" rows="10" readonly placeholder="Generated output will appear here..."></textarea>
+                    <div id="externalToolsSection" class="external-tools hidden">
+                        <h4>Analyze Sequence:</h4>
+                        <!-- Links will be populated here by JS -->
+                    </div>
+                </section>
+                
+                <section class="grid-item log-section card">
+                     <div class="card-header">
+                        <i class="fas fa-stream"></i>
+                        <h2>Console Log</h2>
+                    </div>
+                    <div id="logArea" class="log-area">
+                        <p>Welcome to Mnemogenomics! Configure your model and input to start.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
