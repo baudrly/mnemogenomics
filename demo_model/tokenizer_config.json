@@ -1,0 +1,17 @@
+{
+    "tokenizer_class": "GPT2Tokenizer",
+    "model_max_length": 256,
+    "bos_token": "[BOS]",
+    "eos_token": "[EOS]",
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "additional_special_tokens": [
+        "[SEP]",
+        "[DNA]",
+        "[RNA]",
+        "[PROTEIN]",
+        "[DESC]"
+    ],
+    "vocab_file": "vocab.json",
+    "merges_file": "merges.txt" 
+}
